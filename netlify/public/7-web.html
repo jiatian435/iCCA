@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iCCA Prognosis Prediction System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36D399',
+            neutral: '#3D4451',
+            'neutral-content': '#F2F7FF',
+            'low-risk': '#36D399',
+            'medium-risk': '#FFAB00',
+            'high-risk': '#F56565',
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .form-input-focus {
+        @apply focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none;
+      }
+      .btn-primary {
+        @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50;
+      }
+      .card {
+        @apply bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg;
+      }
+      .form-label {
+        @apply block text-sm font-medium text-gray-700 mb-1;
+      }
+      .form-input {
+        @apply w-full rounded-lg border-gray-300 shadow-sm form-input-focus py-2 px-3 border;
+      }
+      .label-tag {
+        @apply text-xs text-primary font-medium bg-primary/10 px-1.5 py-0.5 rounded ml-2;
+      }
+      .label-tag-secondary {
+        @apply text-xs text-secondary font-medium bg-secondary/10 px-1.5 py-0.5 rounded ml-2;
+      }
+      .risk-badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+      }
+      .plot-card {
+        @apply bg-white rounded-lg shadow-sm p-4 border border-gray-100;
+      }
+    }
+  </style>
+</head>
+<body class="font-inter bg-gray-50 text-neutral min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white shadow-md py-4 px-6 fixed w-full z-50">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center">
+        <img src="pic1.png" alt="West China Hospital Logo" class="mr-2 object-contain" width="250" height="180">
+        <img src="pic2.png" alt="Medical Logo" class="h-16 w-16 mr-2 object-contain">
+        <h1 class="text-xl font-bold text-primary">iCCA Prognosis Prediction System</h1>
+      </div>
+      <div class="hidden md:flex space-x-6">
+        <a href="#" class="text-gray-600 hover:text-primary transition-colors">Home</a>
+        <a href="#" class="text-gray-600 hover:text-primary transition-colors">Documentation</a>
+        <a href="#" class="text-gray-600 hover:text-primary transition-colors">Contact</a>
+      </div>
+      <button class="md:hidden text-gray-600 focus:outline-none">
+        <i class="fa fa-bars text-xl"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow pt-24 pb-12 px-4 md:px-6">
+    <div class="container mx-auto max-w-6xl">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Input Form Section -->
+        <div class="lg:col-span-6">
+          <div class="card">
+            <h2 class="text-xl font-bold text-neutral mb-4">iCCA Patient Data Input</h2>
+            <p class="text-sm text-gray-500 mb-6">Note: Input raw clinical values → TyG/SII calculated automatically by system
+              <br><span class="label-tag">OS</span> = Overall Survival | <span class="label-tag-secondary">DFS</span> = Disease-Free Survival
+            </p>
+            <form id="patient-data-form" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-3">
+                  <div>
+                    <label for="TG" class="form-label">Triglyceride (mmol/L)</label>
+                    <input type="number" id="TG" name="TG" step="0.01" min="0" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="Blood_glucose" class="form-label">Blood Glucose (mmol/L)</label>
+                    <input type="number" id="Blood_glucose" name="Blood_glucose" step="0.01" min="0" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="Neutrophil" class="form-label">Neutrophil (10<sup>9</sup>/L)<span class="label-tag">OS</span></label>
+                    <input type="number" id="Neutrophil" name="Neutrophil" step="0.01" min="0" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="Platelet" class="form-label">Platelet (10<sup>9</sup>/L)</label>
+                    <input type="number" id="Platelet" name="Platelet" step="0.01" min="0" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="Lymphocyte" class="form-label">Lymphocyte (10<sup>9</sup>/L)</label>
+                    <input type="number" id="Lymphocyte" name="Lymphocyte" step="0.01" min="0" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="CEA" class="form-label">CEA (ng/mL)</label>
+                    <input type="number" id="CEA" name="CEA" step="0.01" min="0" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="GGT" class="form-label">GGT (IU/L)</label>
+                    <input type="number" id="GGT" name="GGT" step="0.01" min="0" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="CA199_grade" class="form-label">CA199 grade <span class="label-tag">OS</span></label>
+                    <input type="number" id="CA199_grade" name="CA199_grade" step="0.01" min="0" class="form-input" required>
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <div>
+                    <label for="differentiation_grade" class="form-label">Differentiation Grade</label>
+                    <input type="number" id="differentiation_grade" name="differentiation_grade" min="0" max="1" step="1" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="Lymph_node_metastasis" class="form-label">Lymph Node Metastasis (0=No,1=Yes)</label>
+                    <input type="number" id="Lymph_node_metastasis" name="Lymph_node_metastasis" min="0" max="1" step="1" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="Nerve_invasion" class="form-label">Nerve Invasion (0=No,1=Yes)</label>
+                    <input type="number" id="Nerve_invasion" name="Nerve_invasion" min="0" max="1" step="1" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="Ascites" class="form-label">Ascites (0=No,1=Yes) <span class="label-tag">OS</span></label>
+                    <input type="number" id="Ascites" name="Ascites" min="0" max="1" step="1" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="Globulin" class="form-label">Globulin (g/L) <span class="label-tag">OS</span></label>
+                    <input type="number" id="Globulin" name="Globulin" step="0.01" min="0" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="MVI" class="form-label">MVI (0=No,1=Yes) <span class="label-tag-secondary">DFS</span></label>
+                    <input type="number" id="MVI" name="MVI" min="0" max="1" step="1" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="PT" class="form-label">Prothrombin Time (s) <span class="label-tag-secondary">DFS</span></label>
+                    <input type="number" id="PT" name="PT" step="0.01" min="0" class="form-input" required>
+                  </div>
+                  <div>
+                    <label for="WBC" class="form-label">White Blood Cell (10<sup>9</sup>/L) <span class="label-tag-secondary">DFS</span></label>
+                    <input type="number" id="WBC" name="WBC" step="0.01" min="0" class="form-input" required>
+                  </div>
+                </div>
+              </div>
+              <div class="pt-4">
+                <button type="submit" class="btn-primary w-full flex justify-center items-center">
+                  <i class="fa fa-calculator mr-2"></i> Generate OS/DFS Prognosis Prediction
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Result Section -->
+        <div class="lg:col-span-6">
+          <div class="card h-full flex flex-col">
+            <h2 class="text-xl font-bold text-neutral mb-4">Prediction Results (SSVM Model)</h2>
+            <p class="text-sm text-gray-500 mb-4">Explainable ML for iCCA Curative Resection | C-index: OS=0.754, DFS=0.709</p>
+
+            <div id="empty-state" class="flex-grow flex flex-col items-center justify-center text-center py-10">
+              <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <i class="fa fa-file-medical text-primary text-3xl"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-700 mb-2">Awaiting Patient Clinical Data</h3>
+              <p class="text-gray-500 max-w-md">Fill in the iCCA patient clinical values and submit to generate death and recurrence risk</p>
+            </div>
+
+            <div id="loading-state" class="hidden flex-grow flex flex-col items-center justify-center text-center py-10">
+              <div class="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4"></div>
+              <h3 class="text-lg font-medium text-gray-700">Analyzing iCCA Patient Data</h3>
+              <p class="text-gray-500 mt-2">Calculating TyG/SII → Running SSVM Model → Generating Prognosis... (3-5s)</p>
+            </div>
+
+            <div id="error-state" class="hidden flex-grow flex flex-col items-center justify-center text-center py-10">
+              <div class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                <i class="fa fa-exclamation-triangle text-red-500 text-3xl"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-700 mb-2">Prediction Calculation Error</h3>
+              <p class="text-gray-500 max-w-md mb-4" id="error-message">Please check all inputs (non-negative values, 0/1 for binary variables, 1-3 for differentiation grade) and try again.</p>
+              <button id="retry-button" class="btn-primary px-6">
+                <i class="fa fa-refresh mr-2"></i> Re-enter Data & Predict
+              </button>
+            </div>
+
+            <div id="result-content" class="hidden flex-grow flex flex-col">
+              <!-- 预测结果卡片 -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-50 rounded-lg p-5 border-t-3 border-primary">
+                  <h3 class="text-lg font-semibold text-neutral mb-4 flex items-center">
+                    <i class="fa fa-heartbeat text-primary mr-2"></i> Overall Survival (OS)
+                  </h3>
+                  <div class="space-y-4">
+                    <div>
+                      <div class="flex justify-between mb-1">
+                        <span class="text-sm text-gray-600">Raw Risk Score</span>
+                        <span class="font-semibold text-primary" id="os-raw-score">--</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="flex justify-between mb-1">
+                        <span class="text-sm text-gray-600">Standardized Risk Score (0-1)</span>
+                        <span class="font-semibold text-primary" id="os-standard-score">--</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-primary h-2 rounded-full transition-all duration-1000" id="os-score-progress" style="width: 0%"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="flex justify-between mb-1">
+                        <span class="text-sm text-gray-600">Risk Group</span>
+                        <span id="os-risk-group" class="risk-badge bg-primary/10 text-primary">--</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="flex justify-between mb-1">
+                        <span class="text-sm text-gray-600">Group Average OS (Months)</span>
+                        <span class="font-semibold text-primary" id="os-group-mean">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-5 border-t-3 border-secondary">
+                  <h3 class="text-lg font-semibold text-neutral mb-4 flex items-center">
+                    <i class="fa fa-ban text-secondary mr-2"></i> Disease-Free Survival (DFS)
+                  </h3>
+                  <div class="space-y-4">
+                    <div>
+                      <div class="flex justify-between mb-1">
+                        <span class="text-sm text-gray-600">Raw Risk Score</span>
+                        <span class="font-semibold text-secondary" id="dfs-raw-score">--</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="flex justify-between mb-1">
+                        <span class="text-sm text-gray-600">Standardized Risk Score (0-1)</span>
+                        <span class="font-semibold text-secondary" id="dfs-standard-score">--</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-secondary h-2 rounded-full transition-all duration-1000" id="dfs-score-progress" style="width: 0%"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="flex justify-between mb-1">
+                        <span class="text-sm text-gray-600">Risk Group</span>
+                        <span id="dfs-risk-group" class="risk-badge bg-secondary/10 text-secondary">--</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="flex justify-between mb-1">
+                        <span class="text-sm text-gray-600">Group Average DFS (Months)</span>
+                        <span class="font-semibold text-secondary" id="dfs-group-mean">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 散点图展示区 -->
+              <div class="grid grid-cols-1 gap-4 mb-6">
+                <div class="plot-card">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-3">Risk Score vs Survival Distribution For Reference</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p class="text-xs text-primary font-medium mb-2">OS Scatter Plot</p>
+                      <img src="OS-scatter.png" alt="OS Risk Score Scatter Plot" class="w-full h-auto rounded border border-gray-200">
+                    </div>
+                    <div>
+                      <p class="text-xs text-secondary font-medium mb-2">DFS Scatter Plot</p>
+                      <img src="DFS-scatter.png" alt="DFS Risk Score Scatter Plot" class="w-full h-auto rounded border border-gray-200">
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-2">
+                    Note: Green=Alive, Red=Dead/Recurrence; Vertical dashed lines indicate optimal risk cutoff (Low/Medium/High).
+                  </p>
+                </div>
+              </div>
+
+              <!-- 临床解释 -->
+              <div class="mt-auto">
+                <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-primary">
+                  <h3 class="text-lg font-semibold text-neutral mb-3">Model Interpretation & Clinical Suggestion</h3>
+                  <p class="text-gray-600 text-sm" id="prediction-interpretation">
+                    These risk stratifications and survival estimates are predicted by the <b>SSVM_OS (11 variables)</b> and <b>SSVM_DFS (9 variables)</b> explainable machine learning models for intrahepatic cholangiocarcinoma (iCCA) patients after curative resection.
+                    Risk scores are standardized using training set reference values (0-1 range), and risk groups are defined by X-tile optimal cutoffs.
+                    <br><br>
+                    <b>Clinical Note</b>: This prediction is an adjunct to clinical judgment, not a definitive prognosis.
+                    Treatment decisions should combine with clinical symptoms, imaging and pathological results.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-200 py-6">
+    <div class="container mx-auto px-4 text-center">
+      <p class="text-gray-500 text-sm">© 2025 West China Hospital, Sichuan University - iCCA Prognosis Prediction System</p>
+      <p class="text-gray-500 text-xs mt-1">For healthcare professional use only | Based on Multicenter Retrospective Study of iCCA Curative Resection</p>
+    </div>
+  </footer>
+
+  <script>
+    // DOM elements
+    const patientDataForm = document.getElementById('patient-data-form');
+    const emptyState = document.getElementById('empty-state');
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const resultContent = document.getElementById('result-content');
+    const errorMessage = document.getElementById('error-message');
+    const retryButton = document.getElementById('retry-button');
+
+    // API配置
+    const API_URL = '/.netlify/functions/predict'
+
+    // 风险分组样式映射
+    const riskGroupStyles = {
+      'Low': { bg: 'bg-low-risk/10', text: 'text-low-risk', label: 'Low Risk' },
+      'Medium': { bg: 'bg-medium-risk/10', text: 'text-medium-risk', label: 'Medium Risk' },
+      'High': { bg: 'bg-high-risk/10', text: 'text-high-risk', label: 'High Risk' }
+    };
+
+    // 表单提交处理
+    patientDataForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      emptyState.classList.add('hidden');
+      resultContent.classList.add('hidden');
+      errorState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+
+      const formData = new FormData(patientDataForm);
+      const patientData = {};
+      for (const [key, value] of formData.entries()) {
+        patientData[key] = parseFloat(value);
+        if (isNaN(patientData[key]) || patientData[key] < 0) {
+          throw new Error('All inputs must be non-negative numeric values');
+        }
+      }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(patientData),
+        });
+        if (!response.ok) throw new Error(`Server Error: ${response.status} (${response.statusText})`);
+        const data = await response.json();
+        if (!data.success) throw new Error(data.message || 'SSVM Model Prediction Failed');
+
+        loadingState.classList.add('hidden');
+        resultContent.classList.remove('hidden');
+        updateResults(data);
+      } catch (error) {
+        console.error('Prediction Error:', error);
+        loadingState.classList.add('hidden');
+        errorState.classList.remove('hidden');
+        errorMessage.textContent = error.message || 'Failed to connect to prediction server, please try again later';
+      }
+    });
+
+    // 重试按钮
+    retryButton.addEventListener('click', () => {
+      errorState.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      patientDataForm.reset();
+    });
+
+    // 更新预测结果
+    function updateResults(data) {
+      const osResult = data.os_result;
+      const dfsResult = data.dfs_result;
+
+      // OS结果渲染
+      document.getElementById('os-raw-score').textContent = osResult.raw_risk_score.toFixed(4);
+      document.getElementById('os-standard-score').textContent = osResult.standardized_risk_score.toFixed(4);
+      setTimeout(() => {
+        document.getElementById('os-score-progress').style.width = `${osResult.standardized_risk_score * 100}%`;
+      }, 200);
+      const osRiskStyle = riskGroupStyles[osResult.risk_group];
+      const osRiskBadge = document.getElementById('os-risk-group');
+      osRiskBadge.className = `risk-badge ${osRiskStyle.bg} ${osRiskStyle.text}`;
+      osRiskBadge.textContent = osRiskStyle.label;
+      document.getElementById('os-group-mean').textContent = osResult.os_mean.toFixed(1);
+
+      // DFS结果渲染
+      document.getElementById('dfs-raw-score').textContent = dfsResult.raw_risk_score.toFixed(4);
+      document.getElementById('dfs-standard-score').textContent = dfsResult.standardized_risk_score.toFixed(4);
+      setTimeout(() => {
+        document.getElementById('dfs-score-progress').style.width = `${dfsResult.standardized_risk_score * 100}%`;
+      }, 200);
+      const dfsRiskStyle = riskGroupStyles[dfsResult.risk_group];
+      const dfsRiskBadge = document.getElementById('dfs-risk-group');
+      dfsRiskBadge.className = `risk-badge ${dfsRiskStyle.bg} ${dfsRiskStyle.text}`;
+      dfsRiskBadge.textContent = dfsRiskStyle.label;
+      document.getElementById('dfs-group-mean').textContent = dfsResult.dfs_mean.toFixed(1);
+
+      // 临床解释文本（已删除整体风险分层和临床建议）
+      const interpretationElement = document.getElementById('prediction-interpretation');
+      interpretationElement.innerHTML = `
+        <p class="mb-2"><b>Core Calculation Formulas</b>: TyG = ln(TG × Blood Glucose / 2) | SII = (Neutrophil × Platelet) / Lymphocyte</p>
+        <p class="text-xs text-gray-500 mb-0">
+          <b>OS Risk Reference</b>: Low=35.8 months, Medium=21.2 months, High=12.8 months<br>
+          <b>DFS Risk Reference</b>: Low=28.4 months, Medium=16.7 months, High=7.1 months
+        </p>
+      `;
+    }
+  </script>
+</body>
+</html>

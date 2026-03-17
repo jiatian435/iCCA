@@ -1,0 +1,13 @@
+[build]
+  publish = "public"          # 前端静态文件目录
+  functions = "netlify/functions"  # Python 函数目录
+
+[functions]
+  node_bundler = "esbuild"
+  [functions.runtime]
+    python = "3.11"  # 指定 Python 版本（3.8+ 都可以）
+
+# 可选：设置构建环境变量
+[build.environment]
+  PYTHON_VERSION = "3.11"
+  PIP_NO_CACHE_DIR = "true"
